@@ -12,7 +12,7 @@ namespace Assignment1
     {
         static void Main(string[] args)
         {
-            List<Cart> Items = new List<Cart>();
+            List<CartItem> Items = new List<CartItem>();
             ReadFromFile(Items);
             Console.WriteLine("WELCOME TO THE CONSOLE SHOPPING CART");            
 
@@ -34,17 +34,33 @@ namespace Assignment1
                     Console.Write("Enter unit price ($): ");
                     string Price = Console.ReadLine();  
 
-                    Items.Add(new Cart(Name, int.Parse(Quantity), int.Parse(Price)));
-                    Console.WriteLine("A new item is added to the cart.");
+
+                    Items.Add(new CartItem(Items[Items.Count - 1].RecordNumber + 1, Name, int.Parse(Quantity), int.Parse(Price)));
+                    Console.WriteLine("\nA new item is added to the cart.");
 
                     Console.ResetColor();  // reset color back to the origin
+                }
+                else if (Choice == 2)
+                {
+                    Console.Write("Enter the item name to be removed: ");
+                    string ItemName = Console.ReadLine();
+                    foreach (CartItem Item in Items)
+                    {
+                        if (Item.ItemName == ItemName)
+                        {
+                            Items.Remove(Item);
+                            break;
+                        }
+                    }
+
+                    Console.WriteLine("\n The item is successfully removed from cart");
                 }
                 else if (Choice == 3)  /* View all items in cart */
                 {                    
                     int Length = 0;
-                    foreach (Cart Item in Items)  // check for longest row to get its length
+                    foreach (CartItem Item in Items)  // check for longest row to get its length
                     {
-                        string Line = String.Format("{0}: {1} units, ${2}/item", Item.ItemName, Item.Quantity, Item.Price);
+                        string Line = String.Format("{0}  {1}: {2} units, ${3}/item", Item.RecordNumber, Item.ItemName, Item.Quantity, Item.Price);
                         if (Line.Length > Length)
                         {
                             Length = Line.Length;
@@ -54,9 +70,9 @@ namespace Assignment1
                     Console.ForegroundColor = ConsoleColor.DarkGreen;  // change text color to green
 
                     Console.WriteLine("LIST OF ALL ITEMS IN THE CART\n");                    
-                    foreach (Cart Item in Items)
+                    foreach (CartItem Item in Items)
                     {
-                        Console.WriteLine(String.Format("{0}: {1} units, ${2}/item", Item.ItemName, Item.Quantity, Item.Price));
+                        Console.WriteLine(String.Format("{0}  {1}: {2} units, ${3}/item", Item.RecordNumber, Item.ItemName, Item.Quantity, Item.Price));
                         for (int i = 0; i < Length; i++)
                         {
                             Console.Write("-");
@@ -70,7 +86,15 @@ namespace Assignment1
                 {
                     Console.ForegroundColor = ConsoleColor.DarkGreen;  // change text color to green
 
-                    Console.WriteLine("Good bye and Thank you for using the system.");  
+                    // update the text file
+                    StreamWriter writer = new StreamWriter("productInventory.txt");
+                    foreach (CartItem Item in Items)
+                    {
+                        writer.WriteLine("{0},{1},{2},{3}", Item.RecordNumber, Item.ItemName, Item.Quantity, Item.Price);
+                    }
+                    writer.Close();
+
+                    Console.WriteLine("Good bye and Thank you for using the system.");                    
                     Console.Beep();  // generate beep sound                   
 
                     Console.ResetColor();  // reset color back to the origin
@@ -89,7 +113,7 @@ namespace Assignment1
             Console.WriteLine("5.  Exit");
         }
 
-        public static void ReadFromFile(List<Cart> Items)
+        public static void ReadFromFile(List<CartItem> Items)
         {
             StreamReader reader = new StreamReader("productInventory.txt");
             while (!reader.EndOfStream)
@@ -97,10 +121,15 @@ namespace Assignment1
                 string Item = reader.ReadLine();
                 string[] ItemProp = Item.Split(',');
 
-                string Name = null; int Quantity = 0; int Price = 0;
+                int RecordNumber = 0;  string Name = null; 
+                int Quantity = 0;  int Price = 0;
                 for (int i = 0; i < ItemProp.Length; i++)
                 {
-                    if (i == 1)
+                    if (i == 0)
+                    {
+                        RecordNumber = int.Parse(ItemProp[i]);
+                    }
+                    else if (i == 1)
                     {
                         Name = ItemProp[i];
                     }
@@ -108,14 +137,16 @@ namespace Assignment1
                     {
                         Quantity = int.Parse(ItemProp[i]);
                     }
-                    else if (i == 3)
+                    else
                     {
                         Price = int.Parse(ItemProp[i]);
                     }
                 }
 
-                Items.Add(new Cart(Name, Quantity, Price));
+                Items.Add(new CartItem(RecordNumber, Name, Quantity, Price));
             }
+
+            reader.Close();
         }
     }
 }

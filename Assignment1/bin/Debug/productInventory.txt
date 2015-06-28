@@ -1,5 +1,4 @@
-﻿1,Vampire mouthwash,100,5
-2,Fangs,20,300
+1,Vampire mouthwash,100,5
 3,Red Contact Lens,2000,300
 4,Cauldron,20,100
 5,Vampire Diary,200,5
@@ -8,3 +7,5 @@
 8,Bludger,100,4
 9,Silk Cape,122,100
 10,Vampire Perfume,1000,200
+11,MacBook Pro Retina,12,2000
+12,MacBook Air,10,1120

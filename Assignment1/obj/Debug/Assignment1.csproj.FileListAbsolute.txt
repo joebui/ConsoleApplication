@@ -7,3 +7,6 @@ C:\Users\Dien\Documents\GitHub\Assignment1\Assignment1\obj\Debug\Assignment1.pdb
 C:\Users\Dien\Documents\GitHub\ConsoleApplication\Assignment1\bin\Debug\Assignment1.exe.config
 C:\Users\Dien\Documents\GitHub\ConsoleApplication\Assignment1\obj\Debug\Assignment1.exe
 C:\Users\Dien\Documents\GitHub\ConsoleApplication\Assignment1\obj\Debug\Assignment1.pdb
+C:\Users\Dien\Documents\GitHub\ConsoleApplication\Assignment1\bin\Debug\Assignment1.exe
+C:\Users\Dien\Documents\GitHub\ConsoleApplication\Assignment1\bin\Debug\Assignment1.pdb
+C:\Users\Dien\Documents\GitHub\ConsoleApplication\Assignment1\obj\Debug\Assignment1.csprojResolveAssemblyReference.cache
