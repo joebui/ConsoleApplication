@@ -12,94 +12,65 @@ namespace Assignment1
     {
         static void Main(string[] args)
         {
-            List<CartItem> Items = new List<CartItem>();
-            ReadFromFile(Items);
+            var items = new List<CartItem>();
+            var inventory = new List<InventoryItem>();
+            ReadFromFile(inventory);
             Console.WriteLine("WELCOME TO THE CONSOLE SHOPPING CART");            
 
-            int Choice = 0;
-            while (Choice != 5)  /* The program run continuously until user chooses 5 */
+            var choice = 0;
+            // This loop will run the program run continuously until user chooses 5.
+            while (choice != 5)  
             {
                 PrintMenu();
-                Console.Write("\nYour choice: ");
-                Choice = int.Parse(Console.ReadLine());
-
-                if (Choice == 1)  /* Add an item */
+                Console.Write("\nYour choice (1, 2, 3, 4 or 5): ");
+                try
                 {
-                    Console.ForegroundColor = ConsoleColor.DarkGreen;  // change text color to green
-
-                    Console.Write("Enter item name: ");
-                    string Name = Console.ReadLine();
-                    Console.Write("Enter available quantity: ");
-                    string Quantity = Console.ReadLine();
-                    Console.Write("Enter unit price ($): ");
-                    string Price = Console.ReadLine();  
-
-
-                    Items.Add(new CartItem(Items[Items.Count - 1].RecordNumber + 1, Name, int.Parse(Quantity), int.Parse(Price)));
-                    Console.WriteLine("\nA new item is added to the cart.");
-
-                    Console.ResetColor();  // reset color back to the origin
+                    choice = int.Parse(Console.ReadLine());
                 }
-                else if (Choice == 2)
+                catch (Exception e)
                 {
-                    Console.Write("Enter the item name to be removed: ");
-                    string ItemName = Console.ReadLine();
-                    foreach (CartItem Item in Items)
-                    {
-                        if (Item.ItemName == ItemName)
-                        {
-                            Items.Remove(Item);
-                            break;
-                        }
-                    }
-
-                    Console.WriteLine("\n The item is successfully removed from cart");
+                    // Change text color to red.
+                    Console.ForegroundColor = ConsoleColor.Red;  
+                    Console.WriteLine("ERROR!!!! {0} Try again.", e.Message);
+                    // Reset color back to the origin.
+                    Console.ResetColor();  
+                    continue;
                 }
-                else if (Choice == 3)  /* View all items in cart */
-                {                    
-                    int Length = 0;
-                    foreach (CartItem Item in Items)  // check for longest row to get its length
-                    {
-                        string Line = String.Format("{0}  {1}: {2} units, ${3}/item", Item.RecordNumber, Item.ItemName, Item.Quantity, Item.Price);
-                        if (Line.Length > Length)
-                        {
-                            Length = Line.Length;
-                        }
-                    }
 
-                    Console.ForegroundColor = ConsoleColor.DarkGreen;  // change text color to green
-
-                    Console.WriteLine("LIST OF ALL ITEMS IN THE CART\n");                    
-                    foreach (CartItem Item in Items)
-                    {
-                        Console.WriteLine(String.Format("{0}  {1}: {2} units, ${3}/item", Item.RecordNumber, Item.ItemName, Item.Quantity, Item.Price));
-                        for (int i = 0; i < Length; i++)
-                        {
-                            Console.Write("-");
-                        }
-                        Console.WriteLine();
-                    }
-
-                    Console.ResetColor();  // reset color back to the origin
-                }
-                else if (Choice == 5)  /* Exit the program */
+                // Change text color to green.
+                Console.ForegroundColor = ConsoleColor.Green;                
+                switch (choice)
                 {
-                    Console.ForegroundColor = ConsoleColor.DarkGreen;  // change text color to green
-
-                    // update the text file
-                    StreamWriter writer = new StreamWriter("productInventory.txt");
-                    foreach (CartItem Item in Items)
-                    {
-                        writer.WriteLine("{0},{1},{2},{3}", Item.RecordNumber, Item.ItemName, Item.Quantity, Item.Price);
-                    }
-                    writer.Close();
-
-                    Console.WriteLine("Good bye and Thank you for using the system.");                    
-                    Console.Beep();  // generate beep sound                   
-
-                    Console.ResetColor();  // reset color back to the origin
-                    Thread.Sleep(1000);  // pause the program for 1 seconds
-                }
+                    // Add an item to cart.
+                    case 1:
+                        AddAnItem(items, inventory);
+                        break;
+                    // Remove an item to cart.
+                    case 2:
+                        RemoveAnItem(items, inventory);
+                        break;
+                    // View all items in cart.
+                    case 3:
+                        ViewCart(items);
+                        break;
+                    // Checkout and pay all the items in cart.
+                    case 4:
+                        CheckOut(items);
+                        break;
+                    // Exit the program.
+                    case 5:
+                        ExitProgram(inventory);
+                        break;
+                    default:
+                        // Change text color to red.
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine("ERROR!!!! This option is not available. Try again");
+                        // Change text color to green.
+                        Console.ForegroundColor = ConsoleColor.Green;  
+                        break;
+                }                
+                // Reset color back to the origin.
+                Console.ResetColor();  
             }                                                                      
         }
 
@@ -113,40 +84,220 @@ namespace Assignment1
             Console.WriteLine("5.  Exit");
         }
 
-        public static void ReadFromFile(List<CartItem> Items)
+        public static void ReadFromFile(List<InventoryItem> items)
         {
-            StreamReader reader = new StreamReader("productInventory.txt");
+            var reader = new StreamReader("productInventory.txt");
             while (!reader.EndOfStream)
             {
-                string Item = reader.ReadLine();
-                string[] ItemProp = Item.Split(',');
+                string item = reader.ReadLine();
+                string[] itemProp = item.Split(',');
 
-                int RecordNumber = 0;  string Name = null; 
-                int Quantity = 0;  int Price = 0;
-                for (int i = 0; i < ItemProp.Length; i++)
+                var name = ""; var quantity = 0;
+                var price = 0; var recordNumber = 0;
+
+                // Split the string of each line of the text file by basing on ","
+                // character to retrieve information of each item.
+                for (var i = 0; i < itemProp.Length; i++)
                 {
                     if (i == 0)
                     {
-                        RecordNumber = int.Parse(ItemProp[i]);
+                        recordNumber = int.Parse(itemProp[i]);
                     }
                     else if (i == 1)
                     {
-                        Name = ItemProp[i];
+                        name = itemProp[i];
                     }
                     else if (i == 2)
                     {
-                        Quantity = int.Parse(ItemProp[i]);
+                        quantity = int.Parse(itemProp[i]);
                     }
                     else
                     {
-                        Price = int.Parse(ItemProp[i]);
+                        price = int.Parse(itemProp[i]);
                     }
                 }
 
-                Items.Add(new CartItem(RecordNumber, Name, Quantity, Price));
+                // Add new item to the List.
+                items.Add(new InventoryItem(recordNumber, name, quantity, price));
             }
 
             reader.Close();
+        }
+
+        public static void AddAnItem(List<CartItem> items, List<InventoryItem> inventory)
+        {
+            Console.WriteLine("These are the available items in the inventory.\n");            
+            // View the items in the inventory.            
+            foreach (var item in inventory)
+            {
+                item.PrintItemDetails();
+                for (var i = 0; i < 20; i++)
+                {
+                    Console.Write("-");
+                }
+                Console.WriteLine();
+            }
+
+            var isFailed = true;  
+            while (isFailed == true)
+            {
+                // Get user input about the item's properties.
+                Console.Write("\nEnter item name: ");
+                string name = Console.ReadLine();
+                Console.Write("Enter quantity of the item: ");
+                string quantity = Console.ReadLine();                
+
+                // Check if user has entered invalid inputs.
+                try
+                {
+                    var quantityNumber = int.Parse(quantity);
+                    // The inputs are valid
+                    isFailed = false;
+
+                    var isAvailable = false;
+                    foreach (var item in inventory)
+                    {
+                        if (item.itemName == name)
+                        {
+                            if (item.quantity >= quantityNumber)
+                            {
+                                items.Add(new CartItem(name, int.Parse(quantity), item.price));
+                                item.quantity -= quantityNumber;
+                                Console.WriteLine("\nA new item is added to the cart.");                                
+                            }
+                            else
+                            {
+                                Console.WriteLine("\nThe quantity to order exceeds the quantity available in the stock.");
+                            }
+
+                            isAvailable = true;
+                            break;
+                        }
+                    }
+
+                    if (isAvailable == false)
+                    {
+                        Console.WriteLine("\nThe item's name is not available in the inventory.");
+                    }                     
+                }
+                catch (Exception e)
+                {
+                    // Change text color to red.
+                    Console.ForegroundColor = ConsoleColor.Red;  
+                    Console.WriteLine("ERROR!!!! {0} Try again.", e.Message);
+                    // The inputs are invalid.
+                    isFailed = true;
+                    // Change text color to green.
+                    Console.ForegroundColor = ConsoleColor.Green;  
+                }
+            }                                    
+        }
+
+        public static void RemoveAnItem(List<CartItem> items, List<InventoryItem> inventory)
+        {            
+            var isFailed = true;
+            while (isFailed == true)
+            {
+                Console.Write("\nEnter the item name to be removed: ");
+                string itemName = Console.ReadLine();
+                // Check if the entered item's name is available.
+                foreach (var item in items)
+                {
+                    // The item's name is available.
+                    if (item.itemName == itemName)
+                    {
+                        items.Remove(item);                        
+                        isFailed = false;
+                        break;
+                    }
+                }
+
+                // The item's name is unavailable.
+                if (isFailed == true)
+                {
+                    // Change text color to red.
+                    Console.ForegroundColor = ConsoleColor.Red;  
+                    Console.WriteLine("ERROR!!!! The item name is not available in the cart. Try again");
+                    // Change text color to green.
+                    Console.ForegroundColor = ConsoleColor.Green;
+                }
+            }           
+
+            Console.WriteLine("\nThe item is successfully removed from cart");
+        }
+
+        public static void ViewCart(List<CartItem> items)
+        {            
+            // View the items on the console.
+            Console.WriteLine("LIST OF ALL ITEMS IN YOUR CART\n");
+            foreach (var item in items)
+            {
+                item.PrintItemDetails();
+                for (var i = 0; i < 20; i++)
+                {
+                    Console.Write("-");
+                }
+                Console.WriteLine();
+            }
+        }
+
+        public static void CheckOut(List<CartItem> items)
+        {            
+            ViewCart(items);
+
+            var totalPrice = 0;
+            foreach (var item in items)
+            {
+                totalPrice += item.CalculateTotalPrice();
+            }
+
+            StringBuilder builder = new StringBuilder();
+            builder.Append("\nTotal: $");
+            builder.Append(totalPrice);
+            Console.WriteLine(builder.ToString());            
+
+            string answer = "";
+            while ((answer != "y") && (answer != "n"))
+            {
+                Console.Write("Do you want to purchase all these items in your cart? (y/n): ");
+                 answer = Console.ReadLine();
+
+                switch (answer)
+                {
+                    case "y":
+                        Console.WriteLine("You have successfully purchased all the items in cart.");
+                        items.Clear();
+                        break;
+                    case "n":
+                        Console.WriteLine("You stop purchasing the items in cart");
+                        break;
+                    default:
+                        Console.WriteLine("ERROR!!! Wrong input, you must type \"y\" or \"n\".");
+                        break;
+                }
+            }
+        }
+
+        public static void ExitProgram(List<InventoryItem> inventory)
+        {
+            // Update the text file.
+            var writer = new StreamWriter("productInventory.txt");
+            
+            foreach (var item in inventory)
+            {
+                writer.WriteLine("{0},{1},{2},{3}", item.recordNumber, item.itemName, item.quantity, item.price);                
+            }
+            writer.Close();
+
+            Console.WriteLine("Good bye and Thank you for using the Console Shopping Cart.");
+            // Generate beep sound.
+            Console.Beep();
+
+            // Reset color back to its origin.
+            Console.ResetColor();
+            // Pause the program for 1 seconds
+            // before exit.
+            Thread.Sleep(1000);  
         }
     }
 }
