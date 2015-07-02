@@ -8,11 +8,11 @@ using System.Collections;
 
 namespace Assignment1
 {
-    class CartItem
-    {        
-        public string itemName { get; set; }
-        public int quantity { get; set; }
-        public int price { get; set; }
+    class CartItem : Item
+    {
+        public override string itemName { get; set; }
+        public override int quantity { get; set; }
+        public override int price { get; set; }
 
         public CartItem(string itemName, int quantity, int price)
         {            
@@ -21,12 +21,7 @@ namespace Assignment1
             this.price = price;
         }
 
-        public int CalculateTotalPrice()
-        {
-            return quantity * price;
-        }
-
-        public void PrintItemDetails()
+        public override void PrintItemDetails()
         {
             Console.WriteLine(String.Format("{0}: {1} units, ${2}/item", itemName, quantity, price));
         }

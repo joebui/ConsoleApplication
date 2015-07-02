@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 
 namespace Assignment1
 {
-    class InventoryItem
+    class InventoryItem : Item
     {
         public int recordNumber { get; set; }
-        public string itemName { get; set; }
-        public int quantity { get; set; }
-        public int price { get; set; }
+        public override string itemName { get; set; }
+        public override int quantity { get; set; }
+        public override int price { get; set; }
 
         public InventoryItem(int recordNumber, string itemName, int quantity, int price)
         {
@@ -21,7 +21,7 @@ namespace Assignment1
             this.price = price;
         }
 
-        public void PrintItemDetails()
+        public override void PrintItemDetails()
         {
             Console.WriteLine(String.Format("{0} - {1}: {2} units, ${3}/item", recordNumber, itemName, quantity, price));
         }
