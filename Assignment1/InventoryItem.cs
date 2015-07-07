@@ -8,7 +8,7 @@ namespace Assignment1
 {
     class InventoryItem : Item
     {
-        public int recordNumber { get; set; }
+        public override int recordNumber { get; set; }
         public override string itemName { get; set; }
         public override int quantity { get; set; }
         public override int price { get; set; }
@@ -19,11 +19,6 @@ namespace Assignment1
             this.itemName = itemName;
             this.quantity = quantity;
             this.price = price;
-        }
-
-        public override void PrintItemDetails()
-        {
-            Console.WriteLine(String.Format("{0} - {1}: {2} units, ${3}/item", recordNumber, itemName, quantity, price));
         }
     }
 }

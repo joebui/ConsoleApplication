@@ -10,20 +10,22 @@ namespace Assignment1
 {
     class CartItem : Item
     {
+        public override int recordNumber { get; set; }
         public override string itemName { get; set; }
         public override int quantity { get; set; }
         public override int price { get; set; }
 
-        public CartItem(string itemName, int quantity, int price)
-        {            
+        public CartItem(int recordNumber, string itemName, int quantity, int price)
+        {
+            this.recordNumber = recordNumber;
             this.itemName = itemName;
             this.quantity = quantity;
             this.price = price;
         }
 
-        public override void PrintItemDetails()
+        public int TotalPrice()
         {
-            Console.WriteLine(String.Format("{0}: {1} units, ${2}/item", itemName, quantity, price));
+            return quantity * price;
         }
     }
 }
