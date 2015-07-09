@@ -47,7 +47,7 @@ namespace Assignment1
                         break;
                     // Remove an item to cart.
                     case 2:
-                        RemoveAnItem(items, inventory);
+                        RemoveAnItem(items);
                         break;
                     // View all items in cart.
                     case 3:
@@ -90,34 +90,12 @@ namespace Assignment1
             while (!reader.EndOfStream)
             {
                 string item = reader.ReadLine();
-                string[] itemProp = item.Split(',');
-
-                var name = ""; var quantity = 0;
-                var price = 0; var recordNumber = 0;
-
                 // Split the string of each line of the text file by basing on ","
                 // character to retrieve information of each item.
-                for (var i = 0; i < itemProp.Length; i++)
-                {
-                    switch (i)
-                    {
-                        case 0:
-                            recordNumber = int.Parse(itemProp[i]);
-                            break;
-                        case 1:
-                            name = itemProp[i];
-                            break;
-                        case 2:
-                            quantity = int.Parse(itemProp[i]);
-                            break;
-                        default:
-                            price = int.Parse(itemProp[i]);
-                            break;
-                    }                    
-                }
+                string[] itemProp = item.Split(',');                                               
 
                 // Add new item to the List.
-                items.Add(new InventoryItem(recordNumber, name, quantity, price));
+                items.Add(new InventoryItem(int.Parse(itemProp[0]), itemProp[1], int.Parse(itemProp[2]), int.Parse(itemProp[3])));
             }
 
             reader.Close();
@@ -167,13 +145,13 @@ namespace Assignment1
                     {                        
                         // Compare the entered quantity with that in the inventory.
                         var requiredItemNumbers = from item in requiredItems
-                                                    where item.quantity >= quantityNumber
-                                                    select new CartItem(item.recordNumber, item.itemName, item.quantity, item.price);
+                                                    where (item.quantity >= quantityNumber) && (quantityNumber > 0)
+                                                    select new CartItem(item.recordNumber, item.itemName, quantityNumber, item.price);
 
                         if (!requiredItemNumbers.Any())
                         {
                             Console.ForegroundColor = ConsoleColor.Red;
-                            Console.WriteLine("The quantity to order exceeds the quantity available in the stock.");
+                            Console.WriteLine("The quantity must be larger than 0 AND must not exceed the quantity\navailable in the inventory.");
                             Console.ForegroundColor = ConsoleColor.Green;
                         }
                         else
@@ -183,7 +161,8 @@ namespace Assignment1
                                 // Add new item to cart.
                                 items.Add(item);
                                 // Update the stock value in the inventory.
-                                item.quantity -= quantityNumber;
+                                InventoryItem result = inventory.Find(resultItem => resultItem.recordNumber == item.recordNumber);
+                                result.quantity -= quantityNumber;                                
                                 Console.WriteLine("\nA new item is added to the cart.");
                             }
                         }                                                                           
@@ -202,7 +181,7 @@ namespace Assignment1
             }                                    
         }
 
-        static void RemoveAnItem(List<CartItem> items, List<InventoryItem> inventory)
+        static void RemoveAnItem(List<CartItem> items)
         {                        
             while (true)
             {
@@ -226,10 +205,12 @@ namespace Assignment1
                     }
                     else
                     {
-                        foreach (var item in requiredItems)
-                        {
-                            items.Remove(item);
-                        }
+                        // Remove the required item from the cart.
+                        List<CartItem> toList = requiredItems.ToList();                        
+                        foreach (var item in toList)
+                        {                            
+                            items.Remove(items.Find(reqItem => reqItem.recordNumber == item.recordNumber));
+                        }                        
                         Console.WriteLine("\nThe item is successfully removed from cart");
                     }
 
@@ -239,7 +220,7 @@ namespace Assignment1
                 {
                     // Change text color to red.
                     Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine("ERROR!!!! {0} Try again.", e.Message);                                        
+                    Console.WriteLine("ERROR!!!! {0} Try again.", e.Message);
                     // Change text color to green.
                     Console.ForegroundColor = ConsoleColor.Green;
                 }  

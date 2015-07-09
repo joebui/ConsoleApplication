@@ -1,7 +1,7 @@
-1,Vampire mouthwash,90,5
+1,Vampire mouthwash,60,5
 2,Fangs,0,300
-3,Red Contact Lens,2000,300
-4,Cauldron,15,100
+3,Red Contact Lens,1990,300
+4,Cauldron,5,100
 5,Vampire Diary,200,5
 6,Pensieve,100000,100
 7,Wand,2000,200
