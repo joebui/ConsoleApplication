@@ -15,7 +15,7 @@ namespace Assignment1
 
         public void PrintItemDetails()
         {
-            Console.WriteLine(String.Format("{0} - {1}: {2} units, ${3}/item", recordNumber, itemName, quantity, price));
+            Console.WriteLine(String.Format("ID: {0} - {1}: {2} units, ${3}/item", recordNumber, itemName, quantity, price));
         }
     }
 }
