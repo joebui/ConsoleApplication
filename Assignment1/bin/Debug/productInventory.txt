@@ -1,9 +1,9 @@
-1,Vampire mouthwash,55,5
+1,Vampire mouthwash,30,5
 2,Fangs,0,300
-3,Red Contact Lens,1990,300
+3,Red Contact Lens,1989,300
 4,Cauldron,5,100
 5,Vampire Diary,190,5
-6,Pensieve,100000,100
+6,Pensieve,99990,100
 7,Wand,2000,200
 8,Bludger,100,4
 9,Silk Cape,122,100

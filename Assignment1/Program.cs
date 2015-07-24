@@ -8,20 +8,22 @@ using System.Threading;
 
 namespace Assignment1
 {
-    class Program
+    class Program : ProgramHandler
     {
         static void Main(string[] args)
         {
             var items = new List<CartItem>();
             var inventory = new List<InventoryItem>();
-            ReadFromFile(inventory);
+            Program handler = new Program();
+
+            handler.ReadFromFile(inventory);
             Console.WriteLine("WELCOME TO THE CONSOLE SHOPPING CART");            
 
             var choice = 0;
             // This loop will run the program run continuously until user chooses 5.
             while (choice != 5)  
             {
-                PrintMenu();                
+                handler.PrintMenu();                
                 try
                 {
                     Console.Write("\nYour choice (1, 2, 3, 4 or 5): ");
@@ -29,11 +31,7 @@ namespace Assignment1
                 }
                 catch (Exception e)
                 {
-                    // Change text color to red.
-                    Console.ForegroundColor = ConsoleColor.Red;  
-                    Console.WriteLine("ERROR!!!! {0} Try again.", e.Message);
-                    // Reset color back to the origin.
-                    Console.ResetColor();  
+ 
                     continue;
                 }
 
@@ -43,23 +41,23 @@ namespace Assignment1
                 {
                     // Add an item to cart.
                     case 1:
-                        AddAnItem(items, inventory);
+                        handler.AddAnItem(items, inventory);
                         break;
                     // Remove an item to cart.
                     case 2:
-                        RemoveAnItem(items);
+                        handler.RemoveAnItem(items);
                         break;
                     // View all items in cart.
                     case 3:
-                        ViewCart(items);
+                        handler.ViewCart(items);
                         break;
                     // Checkout and pay all the items in cart.
                     case 4:
-                        CheckOut(items, inventory);
+                        handler.CheckOut(items, inventory);
                         break;
                     // Exit the program.
                     case 5:
-                        ExitProgram(inventory);
+                        handler.ExitProgram(inventory);
                         break;
                     default:
                         // Change text color to red.
@@ -74,7 +72,7 @@ namespace Assignment1
             }                                                                      
         }
 
-        static void PrintMenu()
+        public void PrintMenu()
         {
             Console.WriteLine("\nFollowing options are available for you:\n");
             Console.WriteLine("1.  Add an item to cart");
@@ -84,7 +82,7 @@ namespace Assignment1
             Console.WriteLine("5.  Exit");
         }
 
-        static void ReadFromFile(List<InventoryItem> items)
+        public void ReadFromFile(List<InventoryItem> items)
         {
             var reader = new StreamReader("productInventory.txt");
             while (!reader.EndOfStream)
@@ -92,7 +90,7 @@ namespace Assignment1
                 string item = reader.ReadLine();
                 // Split the string of each line of the text file by basing on ","
                 // character to retrieve information of each item.
-                string[] itemProp = item.Split(',');                                               
+                string[] itemProp = item.Split(',');
 
                 // Add new item to the List.
                 items.Add(new InventoryItem(int.Parse(itemProp[0]), itemProp[1], int.Parse(itemProp[2]), int.Parse(itemProp[3])));
@@ -101,9 +99,9 @@ namespace Assignment1
             reader.Close();
         }
 
-        static void AddAnItem(List<CartItem> items, List<InventoryItem> inventory)
+        public void AddAnItem(List<CartItem> items, List<InventoryItem> inventory)
         {
-            Console.WriteLine("These are the available items in the inventory:\n");            
+            Console.WriteLine("These are the available items in the inventory:\n");
             // View all the items in the inventory.            
             foreach (var item in inventory)
             {
@@ -114,10 +112,10 @@ namespace Assignment1
                 }
                 Console.WriteLine();
             }
-            
+
             // The process repeats until user enters valid inputs.
             while (true)
-            {                               
+            {
                 // Check if user has entered invalid inputs.
                 try
                 {
@@ -126,13 +124,13 @@ namespace Assignment1
                     int id = int.Parse(Console.ReadLine());
                     Console.Write("Enter quantity of the item: ");
                     string quantity = Console.ReadLine();
-                    
-                    var quantityNumber = int.Parse(quantity);                                                            
-                    
+
+                    var quantityNumber = int.Parse(quantity);
+
                     // Search for the item in the inventory by the ID.
                     var requiredItems = from item in inventory
-                                       where item.recordNumber == id
-                                       select new CartItem(item.recordNumber, item.itemName, item.quantity, item.price);
+                                        where item.recordNumber == id
+                                        select new CartItem(item.recordNumber, item.itemName, item.quantity, item.price);
 
                     // Check if the entered id is available in the inventory.
                     if (!requiredItems.Any())
@@ -142,11 +140,11 @@ namespace Assignment1
                         Console.ForegroundColor = ConsoleColor.Green;
                     }
                     else
-                    {                        
+                    {
                         // Compare the entered quantity with that in the inventory.
                         var requiredItemNumbers = from item in requiredItems
-                                                    where (item.quantity >= quantityNumber) && (quantityNumber > 0)
-                                                    select new CartItem(item.recordNumber, item.itemName, quantityNumber, item.price);
+                                                  where (item.quantity >= quantityNumber) && (quantityNumber > 0)
+                                                  select new CartItem(item.recordNumber, item.itemName, quantityNumber, item.price);
 
                         if (!requiredItemNumbers.Any())
                         {
@@ -158,41 +156,59 @@ namespace Assignment1
                         {
                             foreach (var item in requiredItemNumbers)
                             {
-                                // Add new item to cart.
-                                items.Add(item);
+                                // Check if there is an item resembling the one to be added in the cart.
+                                var cartItem = from i in items
+                                               where item.recordNumber == i.recordNumber
+                                               select new CartItem(i.recordNumber, i.itemName, i.quantity, i.price);
+
+                                if (!cartItem.Any())
+                                {
+                                    // Add new item to cart if no item is found.
+                                    items.Add(item);
+                                }
+                                else
+                                {
+                                    // Find and Update the quantity of that item in the cart.
+                                    foreach (var c in cartItem)
+                                    {
+                                        CartItem i = items.Find(r => r.recordNumber == c.recordNumber);
+                                        i.quantity += item.quantity;
+                                    }
+                                }
+                                
                                 // Update the stock value in the inventory.
                                 InventoryItem result = inventory.Find(resultItem => resultItem.recordNumber == item.recordNumber);
-                                result.quantity -= quantityNumber;                                
+                                result.quantity -= quantityNumber;
                                 Console.WriteLine("\nA new item is added to the cart.");
                             }
-                        }                                                                           
+                        }
                     }
 
-                    break;                
+                    break;
                 }
                 catch (Exception e)
                 {
                     // Change text color to red.
-                    Console.ForegroundColor = ConsoleColor.Red;  
-                    Console.WriteLine("ERROR!!!! {0} Try again.", e.Message);                                        
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("ERROR!!!! Invalid input, it must be a number. Try again.");
                     // Change text color to green.
-                    Console.ForegroundColor = ConsoleColor.Green;  
+                    Console.ForegroundColor = ConsoleColor.Green;
                 }
-            }                                    
+            }
         }
 
-        static void RemoveAnItem(List<CartItem> items)
-        {                        
+        public void RemoveAnItem(List<CartItem> items)
+        {
             while (true)
             {
                 try
                 {
                     Console.Write("Enter the item id to be removed: ");
                     int id = int.Parse(Console.ReadLine());
-                    
+
                     var requiredItems = from item in items
-                                       where item.recordNumber == id
-                                       select new CartItem(item.recordNumber, item.itemName, item.quantity, item.price);
+                                        where item.recordNumber == id
+                                        select new CartItem(item.recordNumber, item.itemName, item.quantity, item.price);
 
                     // Check if the entered item's name is available.
                     if (!requiredItems.Any())
@@ -206,11 +222,11 @@ namespace Assignment1
                     else
                     {
                         // Remove the required item from the cart.
-                        List<CartItem> toList = requiredItems.ToList();                        
+                        List<CartItem> toList = requiredItems.ToList();
                         foreach (var item in toList)
-                        {                            
+                        {
                             items.Remove(items.Find(reqItem => reqItem.recordNumber == item.recordNumber));
-                        }                        
+                        }
                         Console.WriteLine("\nThe item is successfully removed from cart");
                     }
 
@@ -220,26 +236,26 @@ namespace Assignment1
                 {
                     // Change text color to red.
                     Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine("ERROR!!!! {0} Try again.", e.Message);
+                    Console.WriteLine("ERROR!!!! Invalid input, it must be a number. Try again.", e.Message);
                     // Change text color to green.
                     Console.ForegroundColor = ConsoleColor.Green;
-                }  
-            }                                           
+                }
+            }
         }
 
-        static void ViewCart(List<CartItem> items)
-        {            
+        public void ViewCart(List<CartItem> items)
+        {
             // View the items on the console.
             Console.WriteLine("LIST OF ALL ITEMS IN YOUR CART\n");
             foreach (var item in items)
             {
-                item.PrintItemDetails();                
-                Console.WriteLine("--------------------");                                
+                item.PrintItemDetails();
+                Console.WriteLine("--------------------");
             }
         }
 
-        static void CheckOut(List<CartItem> items, List<InventoryItem> inventory)
-        {            
+        public void CheckOut(List<CartItem> items, List<InventoryItem> inventory)
+        {
             ViewCart(items);
 
             // Calculate the total price of all items in cart.
@@ -252,14 +268,14 @@ namespace Assignment1
             StringBuilder builder = new StringBuilder();
             builder.Append("\nTOTAL PRICE: $");
             builder.Append(totalPrice);
-            Console.WriteLine(builder.ToString());            
+            Console.WriteLine(builder.ToString());
 
             // Check if user wants to purchase the items.
             string answer = "";
             while ((answer != "y") && (answer != "n"))
             {
                 Console.Write("Do you want to purchase all these items in your cart? (y/n): ");
-                 answer = Console.ReadLine();
+                answer = Console.ReadLine();
 
                 switch (answer)
                 {
@@ -282,16 +298,16 @@ namespace Assignment1
                     default:
                         // Change text color to red.
                         Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine("ERROR!!! Wrong input, you must type \"y\" or \"n\".");                        
+                        Console.WriteLine("ERROR!!! Wrong input, you must type \"y\" or \"n\".");
                         // Change text color to green.
-                        Console.ForegroundColor = ConsoleColor.Green;                          
+                        Console.ForegroundColor = ConsoleColor.Green;
                         break;
                 }
             }
         }
 
-        static void ExitProgram(List<InventoryItem> inventory)
-        {            
+        public void ExitProgram(List<InventoryItem> inventory)
+        {
             Console.WriteLine("Good bye and Thank you for using the Console Shopping Cart.");
             // Generate beep sound.
             Console.Beep();
@@ -299,7 +315,7 @@ namespace Assignment1
             Console.ResetColor();
             // Pause the program for 1 seconds
             // before exit.
-            Thread.Sleep(1000);  
+            Thread.Sleep(1000);
         }
     }
 }
