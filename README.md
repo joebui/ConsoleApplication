@@ -1,2 +1,2 @@
 # ConsoleApplication
-This is the Console Application created by C# .NET
+This is the simple console shopping cart created by C# .NET
